@@ -52,3 +52,31 @@
     mode: 0644
     force: yes
   notify: Handers | Update 'tzdata'
+
+- debug:
+    msg: "{{ ansible_local }}"
+  ignore_errors: yes
+
+- debug:
+    msg: "{{ system.timezone }}"
+  ignore_errors: yes
+
+- debug:
+    msg: "{{ tz }}"
+  ignore_errors: yes
+
+- name: re-read facts after adding custom fact
+  setup:
+    fact_path: "{{ playbook_dir }}/ansible_facts.d"
+
+- debug:
+    msg: "{{ ansible_local }}"
+  ignore_errors: yes
+
+- debug:
+    msg: "{{ system.timezone }}"
+  ignore_errors: yes
+
+- debug:
+    msg: "{{ tz }}"
+  ignore_errors: yes
