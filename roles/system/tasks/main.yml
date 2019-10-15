@@ -35,6 +35,18 @@
 - name: Remove CPU Power task
   include_tasks: "subtasks/remove_cpupower.yml"
 
+- debug:
+    msg: "{{ ansible_local }}"
+  ignore_errors: yes
+
+- debug:
+    msg: "{{ system.timezone }}"
+  ignore_errors: yes
+
+- debug:
+    msg: "{{ tz }}"
+  ignore_errors: yes
+
 - name: Set Time Zone task
   import_tasks: "subtasks/timezone.yml"
   when: tz is defined
