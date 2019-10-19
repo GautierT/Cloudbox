@@ -16,6 +16,7 @@
 <br />
 [![GitHub: Commits since latest version](https://img.shields.io/github/commits-since/Cloudbox/Cloudbox/latest/develop.svg?style=for-the-badge&colorB=177DC1)](https://github.com/cloudbox/cloudbox/compare/HEAD...develop)
 [![GitHub: Last commit date (develop)](https://img.shields.io/github/last-commit/Cloudbox/Cloudbox/develop.svg?style=for-the-badge&colorB=177DC1)](https://github.com/Cloudbox/Cloudbox/commits/develop)
+<br />
 [![AppVeyor](https://img.shields.io/appveyor/ci/Cloudbox/Cloudbox/develop.svg?style=for-the-badge&colorB=177DC1&label=appveyor)](https://ci.appveyor.com/project/Cloudbox/Cloudbox)
 
 Cloudbox is an Ansible-based solution for rapidly deploying a Docker containerized cloud media server. 
