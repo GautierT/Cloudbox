@@ -13,10 +13,8 @@
 <br />
 [![GitHub: Latest version](https://img.shields.io/github/release/cloudbox/cloudbox.svg?style=for-the-badge&colorB=177DC1&label=latest%20version&)](https://github.com/cloudbox/cloudbox/releases)
 [![GitHub: Latest version date](https://img.shields.io/github/release-date/cloudbox/cloudbox.svg?style=for-the-badge&colorB=177DC1&label=latest%20version%20(date))](https://github.com/cloudbox/cloudbox/releases)
-
-
-[![GitHub: Commits since latest version](https://img.shields.io/github/commits-since/Cloudbox/Cloudbox/latest/develop.svg?style=for-the-badge&colorB=177DC1)](https://github.com/cloudbox/cloudbox/compare/HEAD...develop)
 <br />
+[![GitHub: Commits since latest version](https://img.shields.io/github/commits-since/Cloudbox/Cloudbox/latest/develop.svg?style=for-the-badge&colorB=177DC1)](https://github.com/cloudbox/cloudbox/compare/HEAD...develop)
 [![GitHub: Last commit date (develop)](https://img.shields.io/github/last-commit/Cloudbox/Cloudbox/develop.svg?style=for-the-badge&colorB=177DC1)](https://github.com/Cloudbox/Cloudbox/commits/develop)
 [![AppVeyor](https://img.shields.io/appveyor/ci/Cloudbox/Cloudbox/develop.svg?style=for-the-badge&colorB=177DC1&label=appveyor)](https://ci.appveyor.com/project/Cloudbox/Cloudbox)
 
