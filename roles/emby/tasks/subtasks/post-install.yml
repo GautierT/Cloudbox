@@ -8,29 +8,27 @@
 #                   GNU General Public License v3.0                      #
 ##########################################################################
 ---
-- name: Post-Install | Wait 10 seconds
+- name: Post-Install | Wait 10 seconds before continuing
   wait_for:
     timeout: 10
 
-# Sometimes docker will set transcodes folder to root after a restore.
 - name: Post-Install | Ensure transcodes folder has the correct permissions
   file:
-    path: "{{ emby_transcodes_path }}"
+    path: "{{ emby_paths_transcodes_location }}"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
     mode: 0775
     recurse: yes
 
-- name: Post-Install | Wait for '{{ emby_config_file_path | basename }}' to be created
-  wait_for:
-    path: "{{ emby_config_file_path }}"
-    state: present
-
-- name: Post-Install | Import '{{ emby_dlna_file_path | basename }}'
+- name: Post-Install | Import 'dlna.xml'
   copy:
     src: "dlna.xml"
-    dest: "{{ emby_dlna_file_path }}"
+    dest: "{{ emby_paths_dlna_xml_location }}"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
     mode: 0775
     force: no
+
+- name: Post-Install | Settings Tasks
+  import_tasks: "settings.yml"
+  when: reverse_proxy_is_enabled

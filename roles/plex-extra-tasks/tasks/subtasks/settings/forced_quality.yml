@@ -11,11 +11,11 @@
 ##########################################################################
 ---
 - name: Settings | Forced Quality | Install lxml pip module
-  pip: "name=lxml state=present"
+  raw: pip install lxml
 
 - name: Settings | Forced Quality | Wait for 'Preferences.xml' to be created by Plex
   wait_for:
-    path: "{{ plex_config_file_path }}"
+    path: "{{ plex_paths_config_location }}"
     state: present
 
 # 'forceAutoAdjustQuality' in Preferences.xml
@@ -24,11 +24,13 @@
 - name: "Settings | Forced Quality | Set 'forceAutoAdjustQuality' in 'Preferences.xml' to
     '{{ (plex.force_auto_adjust_quality|default(false,true)) | ternary('Enabled','Disabled') }}'."
   xml:
-    path: "{{ plex_config_file_path }}"
+    path: "{{ plex_paths_config_location }}"
     xpath: /Preferences
     attribute: forceAutoAdjustQuality
     value: "{{ (plex.force_auto_adjust_quality|default(false,true)) | ternary('1','0') }}"
     state: present
+  become: yes
+  become_user: "{{ user.name }}"
   register: x
   ignore_errors: yes
 
@@ -38,17 +40,19 @@
 - name: "Settings | Forced Quality | Set 'AllowHighOutputBitrates' in 'Preferences.xml' to
     '{{ (plex.force_high_output_bitrates|default(false,true)) | ternary('Enabled','Disabled') }}'."
   xml:
-    path: "{{ plex_config_file_path }}"
+    path: "{{ plex_paths_config_location }}"
     xpath: /Preferences
     attribute: AllowHighOutputBitrates
     value: "{{ (plex.force_high_output_bitrates|default(false,true)) | ternary('1','0') }}"
     state: present
+  become: yes
+  become_user: "{{ user.name }}"
   register: y
   ignore_errors: yes
 
 - name: Settings | Forced Quality | Restart plex container
   docker_container:
-    name: "{{ docker_name }}"
+    name: "{{ plex_docker_container }}"
     state: started
     restart: yes
   when: ('plex_forced_quality' in ansible_run_tags) and (x.changed or y.changed)

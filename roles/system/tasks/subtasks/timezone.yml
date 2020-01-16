@@ -26,6 +26,12 @@
         return_content: yes
       register: ip_api_timezone_response
 
+    - name: Time Zone | Get Time Zone from 'http://ip-api.com'
+      uri:
+        url: http://ip-api.com/line?fields=timezone
+        return_content: yes
+      register: ip_api_timezone_response
+
     - name: Time Zone | Set 'tz' variable from 'http://ip-api.com'
       set_fact:
         tz: "{{ ip_api_timezone_response.content | trim }}"
@@ -38,6 +44,11 @@
     - (system.timezone is defined)
     - ('auto' in system.timezone | lower)
   ignore_errors: yes
+
+- name: Time Zone | Set Time Zone
+  timezone:
+    name: "{{ tz }}"
+  notify: Handers | Update 'tzdata'
 
 - name: Time Zone | Import '/etc/timezone'
   template:

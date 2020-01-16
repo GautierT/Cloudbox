@@ -1,6 +1,6 @@
 #########################################################################
 # Title:         Cloudbox: Plex Role                                    #
-# Author(s):     l3uddz, desimaniac                                     #
+# Author(s):     desimaniac, l3uddz                                     #
 # URL:           https://github.com/cloudbox/cloudbox                   #
 # --                                                                    #
 #         Part of the Cloudbox project: https://cloudbox.works          #
@@ -8,31 +8,32 @@
 #                   GNU General Public License v3.0                     #
 #########################################################################
 ---
-- name: Variables Task
-  import_tasks: "subtasks/variables.yml"
-
 - name: Create DNS Record
   include_role:
     name: dns
   vars:
-    record: "{{ subdomain }}"
-  when: reverse_proxy_is_enabled
+    dns_record: "{{ plex_web_subdomain }}"
+    dns_zone: "{{ plex_web_domain }}"
 
 - name: Remove existing Docker container
   docker_container:
-    name: "{{ docker_name }}"
+    name: "{{ lookup('vars', role_name + '_docker_container') }}"
     state: absent
 
 - name: Create directories
-  file: "path={{ item }} state=directory mode=0775 owner={{ user.name }} group={{ user.name }}"
-  with_items: "{{ folders }}"
+  file: "path={{ item }} state=directory owner={{ user.name }} group={{ user.name }} mode=0775"
+  with_items: "{{ lookup('vars', role_name + '_paths_folders_list') }}"
 
 - name: Preferences Tasks
   import_tasks: "subtasks/preferences/preferences.yml"
   when: (not continuous_integration)
 
+- name: Docker Devices Task
+  include_tasks: "{{ resources_tasks_path }}/docker/set_docker_devices_variable.yml"
+  when: (gpu.intel or gpu.nvidia.enabled)
+
 - name: Create Docker container
-  include_tasks: "{{ playbook_dir }}/resources/tasks/docker/create_docker_container.yml"
+  include_tasks: "{{ resources_tasks_path }}/docker/create_docker_container.yml"
 
 - name: Post-Install Tasks
-  import_tasks: "subtasks/post-install.yml"
+  import_tasks: "subtasks/post-install/main.yml"

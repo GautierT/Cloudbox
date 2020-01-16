@@ -9,59 +9,56 @@
 #########################################################################
 ---
 - name: Remove legacy service
-  include_tasks: "{{ playbook_dir }}/resources/tasks/systemd/delete_service.yml"
+  include_tasks: "{{ resources_tasks_path }}/systemd/delete_service.yml"
   vars:
     _service_name: unionfs_cleaner
 
 - name: Stop Service
-  include_tasks: "{{ playbook_dir }}/resources/tasks/systemd/stop_service.yml"
+  include_tasks: "{{ resources_tasks_path }}/systemd/stop_service.yml"
   vars:
-    _service_name: cloudplow
+    _service_name: "{{ cloudplow_service_name }}"
 
 - name: Update Service Credentials
-  include_tasks: "{{ playbook_dir }}/resources/tasks/systemd/update_service_credentials.yml"
+  include_tasks: "{{ resources_tasks_path }}/systemd/update_service_credentials.yml"
   vars:
-    _service_name: cloudplow
+    _service_name: "{{ cloudplow_service_name }}"
 
 - name: Create directory
-  file: "path={{ folder_path }} state=directory owner={{ user.name }} group={{ user.name }} mode=0775 recurse=yes"
+  file: "path={{ cloudplow_path }} state=directory owner={{ user.name }} group={{ user.name }} mode=0775 recurse=yes"
 
-- name: Clone git repo
-  include_tasks: "{{ playbook_dir }}/resources/tasks/git/clone_git_repo.yml"
-  vars:
-    _git_repo_url: "{{ git_repo_url }}"
-    _git_repo_dest: "{{ git_repo_dest }}"
+- name: Clone project git repo
+  include_tasks: "{{ resources_tasks_path }}/git/clone_git_repo.yml"
 
 - name: Install pip requirements
   pip:
-    requirements: "{{ requirements_path }}"
-    executable: "{{ pip_executable }}"
+    requirements: "{{ cloudplow_requirements_path }}"
+    executable: "{{ cloudplow_pip_excutable }}"
 
 - name: Set script as executable
   file:
-    path: "{{ script_path }}"
+    path: "{{ cloudplow_script_path }}"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
     mode: a+x
 
 - name: Create script alias
   file:
-    src: "{{ script_path }}"
-    dest: "{{ alias_path }}"
+    src: "{{ cloudplow_script_path }}"
+    dest: "{{ cloudplow_alias_path }}"
     state: link
 
 - name: Import Settings Task
   import_tasks: "subtasks/settings.yml"
 
-- name:  Services | Import '{{ service_file }}'
+- name: Import '{{ cloudplow_service_name }}.service'
   template:
     src: cloudplow.service.j2
-    dest: "{{ service_path }}"
+    dest: "/etc/systemd/system/{{ cloudplow_service_name }}.service"
     force: no
 
 - name: Start service
   systemd:
-    name: "{{ service_name }}"
+    name: "{{ cloudplow_service_name }}"
     state: started
     enabled: yes
     daemon_reload: yes

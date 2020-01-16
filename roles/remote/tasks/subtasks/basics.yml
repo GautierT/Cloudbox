@@ -8,7 +8,6 @@
 #                   GNU General Public License v3.0                     #
 #########################################################################
 ---
-- name: Basics | Create remote directories
-  file: "path={{ item }} state=directory mode=0775 owner={{ user.name }} group={{ user.name }} recurse=yes"
-  with_items:
-    - /mnt/remote
+- name: Basics | Create mount directories
+  file: "path={{ item }} state=directory owner={{ user.name }} group={{ user.name }} mode=0775 recurse=yes"
+  with_items: "{{ mount_paths }}"

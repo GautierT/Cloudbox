@@ -9,6 +9,12 @@
 ##########################################################################
 ---
 ################################
+# Resources
+################################
+
+resources_tasks_path: "{{ playbook_dir }}/resources/tasks"
+
+################################
 # Continuous Integration
 ################################
 
@@ -60,6 +66,14 @@ torrents_downloads_path_is_defined: "{{ (downloads is defined) and
 
 use_torrents: "{{ torrents_downloads_path_is_defined }}"
 
+feeder_mount_is_enabled:  "{{ (mounts is defined) and
+                              (mounts is not none) and
+                              (mounts | trim | length > 0) and
+                              (mounts.feeder is defined) and
+                              (mounts.feeder is not none) and
+                              (mounts.feeder | trim | length > 0) and
+                              (mounts.feeder) }}"
+
 rclone_remote_is_defined: "{{ (rclone is defined) and
                               (rclone is not none) and
                               (rclone | trim | length > 0) and
@@ -67,11 +81,11 @@ rclone_remote_is_defined: "{{ (rclone is defined) and
                               (rclone.remote is not none) and
                               (rclone.remote | trim | length > 0) }}"
 
-use_remote: "{{ rclone_remote_is_defined }}"
+use_remote: "{{ feeder_mount_is_enabled or rclone_remote_is_defined }}"
 
 use_nvidia: "{{ gpu.nvidia.enabled  }}"
 
-use_sma: "{{ sickbeard_mp4_automator }}"
+use_sma: "{{ sickbeard_mp4_automator  | default(false,true) }}"
 
 ################################
 # System
@@ -80,6 +94,12 @@ use_sma: "{{ sickbeard_mp4_automator }}"
 server_root_path: "/"
 
 server_appdata_path: "{{ server_root_path | regex_replace('\\/$', '') + '/opt' }}"
+
+################################
+# Paths
+################################
+
+transcodes_path: "{{ plex.transcodes }}"
 
 ################################
 # User
@@ -97,12 +117,12 @@ vgid: "{{ ansible_local.group.video.gid }}"
 
 tz: "{{ system.timezone
         if system is defined and
-          system.timezone is defined and
-          'auto' not in system.timezone | lower
+            system.timezone is defined and
+            'auto' not in system.timezone | lower
         else ansible_local.timezone
-          if ansible_local is defined and
-            ansible_local.timezone is defined and
-            ansible_local.timezone | trim | length > 0
+            if ansible_local is defined and
+                ansible_local.timezone is defined and
+                ansible_local.timezone | trim | length > 0
         else 'Etc/UTC' }}"
 
 ################################
@@ -113,10 +133,10 @@ ip_address_host: "0.0.0.0"
 
 ip_address_localhost: "127.0.0.1"
 
-ip_address_lookup_command: dig -4 TXT +short o-o.myaddr.l.google.com @ns1.google.com | awk -F'\"' '{ print $2}'
+ip_address_public: "{{ ansible_local.network.ip.public_ip | default(ansible_default_ipv4.address) }}"
 
 ################################
-# Docker Reverse Proxy
+# Reverse Proxy
 ################################
 
 reverse_proxy_is_enabled: "{{ (user is defined) and
@@ -129,60 +149,34 @@ reverse_proxy_is_enabled: "{{ (user is defined) and
                               (user.email is not none) and
                               (user.email | trim | length > 0) }}"
 
-docker_envs_reverse_proxy:
-  VIRTUAL_HOST: "{{ subdomain }}.{{ user.domain }}"
-  VIRTUAL_PORT: "{{ web_port }}"
-  LETSENCRYPT_HOST: "{{ subdomain }}.{{ user.domain }}"
+################################
+# Docker
+################################
+
+docker_envs_reverse_proxy_common:
+  VIRTUAL_HOST: "{{ lookup('vars', role_name + '_web_subdomain') }}.{{ lookup('vars', role_name + '_web_domain', default=user.domain) }}"
+  VIRTUAL_PORT: "{{ lookup('vars', role_name + '_web_port') }}"
+  LETSENCRYPT_HOST: "{{ lookup('vars', role_name + '_web_subdomain') }}.{{ lookup('vars', role_name + '_web_domain', default=user.domain) }}"
   LETSENCRYPT_EMAIL: "{{ user.email }}"
 
-################################
-# Docker Volumes
-################################
+docker_volumes_downloads_nzbs: "{{ [downloads.nzbs + ':/downloads/nzbs']
+                                    if nzbs_downloads_path_is_defined
+                                    else [] }}"
 
-nzbs_downloads_path: "{{ [downloads.nzbs + ':/downloads/nzbs']
-                          if nzbs_downloads_path_is_defined
-                          else [] }}"
+docker_volumes_downloads_torrents: "{{ [downloads.torrents + ':/downloads/torrents']
+                                        if torrents_downloads_path_is_defined
+                                        else [] }}"
 
-torrents_downloads_path: "{{ [downloads.torrents + ':/downloads/torrents']
-                              if torrents_downloads_path_is_defined
-                              else [] }}"
+docker_volumes_downloads_common: "{{ docker_volumes_downloads_nzbs + docker_volumes_downloads_torrents }}"
 
-################################
-# Docker Devices
-################################
-
-docker_devices_dev_dri:
-  - "/dev/dri:/dev/dri"
-
-################################
-# Docker Labels
-################################
+docker_hosts_common: []
 
 docker_labels_common:
   "com.github.cloudbox.cloudbox_managed": "true"
 
-################################
-# Docker Network
-################################
+docker_networks_name_common: cloudbox
 
 docker_networks_common:
-  - name: cloudbox
+  - name: "{{ docker_networks_name_common }}"
     aliases:
-      - "{{ docker_network_alias }}"
-
-################################
-# Hotio Docker Images
-################################
-
-# default suitarr version
-suitarr:
-  version: image
-
-suitarr_version_is_specified: "{{ (suitarr.version != 'default') and
-                                    ((suitarr.version == 'unstable') or
-                                    (suitarr.version == 'stable') or
-                                    (suitarr.version == 'image')) }}"
-
-suitarr_version: "{{ suitarr.version
-                     if suitarr_version_is_specified
-                     else 'image' }}"
+      - "{{ lookup('vars', role_name + '_docker_networks_alias') }}"

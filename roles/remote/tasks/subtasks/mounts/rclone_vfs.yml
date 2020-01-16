@@ -9,9 +9,7 @@
 #########################################################################
 ---
 - name: Rclone VFS | Reset permissions for 'rclone.conf'
-  file: "path={{ item }} state=file mode=0775 owner={{ user.name }} group={{ user.name }}"
-  with_items:
-    - "/home/{{ user.name }}/.config/rclone/rclone.conf"
+  file: "path={{ rclone_config_path }} state=file owner={{ user.name }} group={{ user.name }} mode=0775"
 
 - name: Rclone VFS | Import 'rclone_vfs.service'
   template:
@@ -54,53 +52,51 @@
   set_fact:
     rclone_remote_is_configured: "{{ (rclone.remote + ':') in rclone_config_remotes }}"
 
-- name: Rclone VFS | Tasks when rclone remote is configured
+- name: Rclone VFS | Tasks when Rclone remote is configured
   block:
+    - name: "Rclone VFS | Test Rclone remote '{{ rclone.remote }}:'"
+      shell: |
+        rclone lsd '{{ rclone.remote }}:' \
+          --user-agent='{{ user_agent }}'
+      become: yes
+      become_user: "{{ user.name }}"
+      register: rclone_test
+      failed_when: (rclone_test.rc|int > 5)
 
-  - name: "Rclone VFS | Test Rclone remote '{{ rclone.remote }}:'"
-    shell: |
-      rclone lsd {{ rclone.remote }}: \
-        --user-agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36'
-    become: yes
-    become_user: "{{ user.name }}"
-    register: rclone_test
-    failed_when: (rclone_test.rc|int > 5)
+    - name: Rclone VFS | Set 'rclone_remote_is_working' variable
+      set_fact:
+        rclone_remote_is_working: "{{ rclone_test.rc | int == 0 }}"
 
-  - name: Rclone VFS | Set 'rclone_remote_is_working' variable
-    set_fact:
-      rclone_remote_is_working: "{{ rclone_test.rc | int == 0 }}"
+    - name: Rclone VFS | Tasks when Rclone remote is working properly
+      block:
+        - name: Rclone VFS | Start 'rclone_vfs.service'
+          systemd: name=rclone_vfs.service state=started enabled=yes
 
-  - name: Rclone VFS | Tasks when rclone remote is working properly
-    block:
+        - name: Rclone VFS | "Wait for 5 seconds"
+          wait_for:
+            timeout: 5
 
-    - name: Rclone VFS | Start 'rclone_vfs.service'
-      systemd: name=rclone_vfs.service state=started enabled=yes
+        - name: Rclone VFS | Start 'rclone_vfs_primer.timer'
+          systemd: name=rclone_vfs_primer.timer state=started enabled=yes
 
-    - name: Rclone VFS | "Wait for 5 seconds"
-      wait_for:
-        timeout: 5
+        - name: Rclone VFS | Start 'rclone_vfs_primer.service'
+          systemd: name=rclone_vfs_primer.service state=started enabled=yes
+          async: 900
+          poll: 0
 
-    - name: Rclone VFS | Start 'rclone_vfs_primer.timer'
-      systemd: name=rclone_vfs_primer.timer state=started enabled=yes
+      when: rclone_remote_is_working
 
-    - name: Rclone VFS | Start 'rclone_vfs_primer.service'
-      systemd: name=rclone_vfs_primer.service state=started enabled=yes
-      async: 900
-      poll: 0
-
-    when: rclone_remote_is_working
-
-  - name: "Rclone VFS | Display error message when rclone remote is not working properly"
-    fail:
-      msg:
-        - "Rclone remote '{{ rclone.remote }}:' is not working properly."
-        - "{{ rclone_test.stderr }}"
-    when: not rclone_remote_is_working
-    ignore_errors: yes
+    - name: "Rclone VFS | Display error message when Rclone remote is not working properly"
+      fail:
+        msg:
+          - "Rclone remote '{{ rclone.remote }}:' is not working properly."
+          - "{{ rclone_test.stderr }}"
+      when: not rclone_remote_is_working
+      ignore_errors: yes
 
   when: rclone_remote_is_configured
 
-- name: "Rclone VFS | Display error message when rclone remote is not configured properly"
+- name: "Rclone VFS | Display error message when Rclone remote is not configured properly"
   fail:
     msg:
       - "Rclone remote '{{ rclone.remote }}:' is not configured properly."
