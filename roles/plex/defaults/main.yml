@@ -45,8 +45,8 @@ plex_web_subdomain: "{{ plex_name }}"
 plex_web_domain: "{{ user.domain }}"
 plex_web_port: "32400"
 plex_web_url: "{{ 'https://' + plex_web_subdomain + '.' + plex_web_domain
-                  if (reverse_proxy_is_enabled)
-                  else 'http://localhost:' + plex_web_port }}"
+  if (reverse_proxy_is_enabled)
+  else 'http://localhost:' + plex_web_port }}"
 
 ################################
 # Docker
@@ -58,26 +58,26 @@ plex_docker_container: "{{ plex_name }}"
 # Image
 plex_docker_image_pull: yes
 plex_docker_image_tag: "{{ plex.tag }}"
-plex_docker_image: "plexinc/pms-docker:{{ plex_docker_image_tag }}"
+plex_docker_image: "cloudb0x/plex:{{ plex_docker_image_tag }}"
 
 # Ports
 plex_docker_ports_defaults:
-  - "{{ plex_web_port }}"
+  - "{{ plex_web_port }}-{{ plex_web_port | int + 10 }}:{{ plex_web_port }}"
 plex_docker_ports_custom: []
 plex_docker_ports_webtools:
-  - "33400/tcp"
-  - "33443/tcp"
+  - "33400-33410:33400/tcp"
+  - "33443-33453:33443/tcp"
 plex_docker_ports: "{{ plex_docker_ports_defaults
-                            + plex_docker_ports_webtools
-                            + plex_docker_ports_custom
-                        if (not reverse_proxy_is_enabled
-                            or plex.open_main_ports)
-                        else plex_docker_ports_webtools
-                            + plex_docker_ports_custom }}"
+  + plex_docker_ports_webtools
+  + plex_docker_ports_custom
+  if (not reverse_proxy_is_enabled
+  or plex.open_main_ports)
+  else plex_docker_ports_webtools
+  + plex_docker_ports_custom }}"
 # Envs
 plex_docker_envs_advertise_ip: "{{ plex_web_url + ':443'
-                                    if (reverse_proxy_is_enabled)
-                                    else '' }}"
+  if (reverse_proxy_is_enabled)
+  else '' }}"
 plex_docker_envs_default:
   PLEX_UID: "{{ uid }}"
   PLEX_GID: "{{ gid }}"
@@ -91,12 +91,12 @@ plex_docker_envs_custom: {}
 plex_docker_envs_reverse_proxy:
   ADVERTISE_IP: "{{ plex_docker_envs_advertise_ip }}"
 plex_docker_envs: "{{ plex_docker_envs_default
-                          | combine(plex_docker_envs_custom)
-                          | combine(plex_docker_envs_reverse_proxy)
-                          | combine(docker_envs_reverse_proxy_common)
-                      if (reverse_proxy_is_enabled)
-                      else plex_docker_envs_default
-                          | combine(plex_docker_envs_custom) }}"
+  | combine(plex_docker_envs_custom)
+  | combine(plex_docker_envs_reverse_proxy)
+  | combine(docker_envs_reverse_proxy_common)
+  if (reverse_proxy_is_enabled)
+  else plex_docker_envs_default
+  | combine(plex_docker_envs_custom) }}"
 
 # Volumes
 plex_docker_volumes_default:
@@ -109,14 +109,14 @@ plex_docker_volumes_default:
   - "{{ plex_paths_transcodes_location }}:/transcode"
 plex_docker_volumes_custom: []
 plex_docker_volumes: "{{ plex_docker_volumes_default
-                              + plex_docker_volumes_custom
-                              + docker_volumes_downloads_common }}"
+  + plex_docker_volumes_custom
+  + docker_volumes_downloads_common }}"
 
 # Devices
 plex_docker_devices_default: []
 plex_docker_devices_custom: []
 plex_docker_devices: "{{ plex_docker_devices_default
-                              + plex_docker_devices_custom }}"
+  + plex_docker_devices_custom }}"
 
 # Hosts
 lazyman_ip: "{{ ( lookup('dig', 'powersports.ml', '@8.8.8.8', 'qtype=A') | ipv4 ) | default(false,true) }}"
@@ -131,15 +131,15 @@ plex_docker_hosts_default:
 
 plex_docker_hosts_custom: []
 plex_docker_hosts: "{{ docker_hosts_common
-                            | combine(plex_docker_hosts_default)
-                            | combine(plex_docker_hosts_custom) }}"
+  | combine(plex_docker_hosts_default)
+  | combine(plex_docker_hosts_custom) }}"
 
 # Labels
 plex_docker_labels_default: {}
 plex_docker_labels_custom: {}
 plex_docker_labels: "{{ docker_labels_common
-                            | combine(plex_docker_labels_default)
-                            | combine(plex_docker_labels_custom) }}"
+  | combine(plex_docker_labels_default)
+  | combine(plex_docker_labels_custom) }}"
 
 # Hostname
 plex_docker_hostname: "{{ plex_name }}"
@@ -149,20 +149,20 @@ plex_docker_networks_alias: "{{ plex_name }}"
 plex_docker_networks_default: []
 plex_docker_networks_custom: []
 plex_docker_networks: "{{ docker_networks_common
-                              + plex_docker_networks_default
-                              + plex_docker_networks_custom }}"
+  + plex_docker_networks_default
+  + plex_docker_networks_custom }}"
 
 # Capabilities
 plex_docker_capabilities_default: []
 plex_docker_capabilities_custom: []
 plex_docker_capabilities: "{{ plex_docker_capabilities_default
-                                  + plex_docker_capabilities_custom }}"
+  + plex_docker_capabilities_custom }}"
 
 # Security Opts
 plex_docker_security_opts_default: []
 plex_docker_security_opts_custom: []
 plex_docker_security_opts: "{{ plex_docker_security_opts_default
-                                    + plex_docker_security_opts_custom }}"
+  + plex_docker_security_opts_custom }}"
 
 # Restart Policy
 plex_docker_restart_policy: unless-stopped
