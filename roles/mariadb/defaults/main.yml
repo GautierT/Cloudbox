@@ -37,8 +37,7 @@ mariadb_docker_image_tag: "latest"
 mariadb_docker_image: "linuxserver/mariadb:{{ mariadb_docker_image_tag }}"
 
 # Ports
-mariadb_docker_ports_defaults:
-  - "{{ mariadb_web_port }}:{{ mariadb_web_port }}"
+mariadb_docker_ports_defaults: []
 mariadb_docker_ports_custom: []
 mariadb_docker_ports: "{{ mariadb_docker_ports_defaults
                               + mariadb_docker_ports_custom
@@ -53,13 +52,7 @@ mariadb_docker_envs_default:
   TZ: "{{ tz }}"
   MYSQL_ROOT_PASSWORD: "{{ mariadb_docker_envs_mysql_root_password }}"
 mariadb_docker_envs_custom: {}
-mariadb_docker_envs_reverse_proxy: {}
 mariadb_docker_envs: "{{ mariadb_docker_envs_default
-                            | combine(mariadb_docker_envs_custom)
-                            | combine(mariadb_docker_envs_reverse_proxy)
-                            | combine(docker_envs_reverse_proxy_common)
-                        if (reverse_proxy_is_enabled)
-                        else mariadb_docker_envs_default
                             | combine(mariadb_docker_envs_custom) }}"
 
 # Volumes
