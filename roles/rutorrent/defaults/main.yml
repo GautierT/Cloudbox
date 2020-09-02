@@ -139,7 +139,7 @@ rutorrent_docker_ports_51413: "{{ port_lookup_51413.port
 rutorrent_docker_ports_6881: "{{ port_lookup_6881.port
                                   if (port_lookup_6881.port is defined)
                                       and (port_lookup_6881.port | trim | length > 0)
-                                  else '6881' }}"
+                                  else '6882' }}"
 rutorrent_docker_ports_torrents:
   - "{{ rutorrent_docker_ports_51413 }}:{{ rutorrent_docker_ports_51413 }}"
   - "{{ rutorrent_docker_ports_6881 }}:{{ rutorrent_docker_ports_6881 }}/udp"
