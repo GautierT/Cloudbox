@@ -53,7 +53,7 @@ skip_commits:
 
   message: /\[minor\]/
 
-image: Ubuntu1604
+image: Ubuntu1804-minimal
 
 matrix:
   fast_finish: true
@@ -62,10 +62,10 @@ matrix:
 build: off
 
 init:
-  - sh: curl -s https://cloudbox.works/scripts/dep.sh | sudo -H sh
+  - sh: curl -s https://cloudbox.works/scripts/dep.sh | sudo -H sh &> /dev/null
 
 install:
-  - sh: sudo pip install 'ansible>=2.9,<2.10'
+  - sh: sudo -H pip install 'ansible>=2.9,<2.10'
   - sh: git submodule update --init --recursive
   - sh: for i in defaults/*; do cp -n $i "$(basename "${i%.*}")"; done
   - sh: sudo ansible-playbook cloudbox.yml --syntax-check

@@ -37,7 +37,7 @@ nzbget_web_url: "{{ 'https://' + nzbget_web_subdomain + '.' + nzbget_web_domain
                     if (reverse_proxy_is_enabled)
                     else 'http://localhost:' + nzbget_web_port }}"
 nzbget_web_login: "{{ user.name }}:{{ user.pass }}"
-nzbget_web_url_with_login: "{{ 'https://' + nzbget_web_login + nzbget_web_subdomain + '.' + nzbget_web_domain
+nzbget_web_url_with_login: "{{ 'https://' + nzbget_web_login + '@' + nzbget_web_subdomain + '.' + nzbget_web_domain
                                 if (reverse_proxy_is_enabled)
                                 else 'http://' + nzbget_web_login + '@' + 'localhost:' + nzbget_web_port }}"
 
@@ -155,7 +155,7 @@ nzbget_docker_container: "{{ nzbget_name }}"
 
 # Image
 nzbget_docker_image_pull: yes
-nzbget_docker_image_tag: "unstable"
+nzbget_docker_image_tag: "testing"
 nzbget_docker_image: "hotio/nzbget:{{ nzbget_docker_image_tag }}"
 
 # Ports

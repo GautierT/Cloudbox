@@ -31,3 +31,5 @@
 ### Misc ###
 /changelog.txt
 /*.log
+
+.filerun*
