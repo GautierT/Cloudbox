@@ -43,8 +43,8 @@ jackett_docker_container: "{{ jackett_name }}"
 
 # Image
 jackett_docker_image_pull: yes
-jackett_docker_image_tag: "release"
-jackett_docker_image: "hotio/jackett:{{ jackett_docker_image_tag }}"
+jackett_docker_image_tag: "latest"
+jackett_docker_image: "sebclem/jackett:{{ jackett_docker_image_tag }}"
 
 # Ports
 jackett_docker_ports_defaults:
@@ -74,7 +74,8 @@ jackett_docker_envs: "{{ jackett_docker_envs_default
 
 # Volumes
 jackett_docker_volumes_default:
-  - "{{ jackett_paths_location }}:/config"
+  - "./jackett/conf:/config"
+  # - "{{ jackett_paths_location }}:/config"
   - "/mnt:/mnt"
   - "{{ jackett_paths_location }}/Definitions:/etc/xdg/cardigan/definitions"
 jackett_docker_volumes_custom: []
