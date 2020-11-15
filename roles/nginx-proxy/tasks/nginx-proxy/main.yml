@@ -12,6 +12,7 @@
   docker_container:
     name: nginx-proxy
     state: absent
+    container_default_behavior: compatibility
 
 - name: Nginx-Proxy | Create nginx-proxy directories
   file: "path={{ item }} state=directory owner={{ user.name }} group={{ user.name }} mode=0775 recurse=yes"
@@ -94,11 +95,13 @@
     labels:
       "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy": "true"
       "com.github.cloudbox.cloudbox_managed": "true"
-    networks_cli_compatible: yes
     networks:
       - name: cloudbox
         aliases:
           - nginx-proxy
+    networks_cli_compatible: yes
+    network_mode: "{{ docker_networks_name_common }}"
     purge_networks: yes
+    container_default_behavior: compatibility
     restart_policy: unless-stopped
     state: started

@@ -30,6 +30,7 @@
   docker_container:
     name: organizr
     state: absent
+    container_default_behavior: compatibility
 
 # START - Migration Tasks
 - name: Check if previous organizr exists
@@ -66,8 +67,6 @@
     name: organizr
     image: 'organizr/organizr'
     pull: yes
-    published_ports:
-      - '127.0.0.1:7421:80'
     env:
       fpm: '{{ (organizr.fpm|default(false,true)) }}'
       branch: '{{ (organizr.branch|default(false,true)) }}'
@@ -86,6 +85,8 @@
       - name: cloudbox
         aliases:
           - organizr
+    networks_cli_compatible: yes
+    network_mode: '{{ docker_networks_name_common }}'
     purge_networks: yes
     restart_policy: unless-stopped
     state: started
