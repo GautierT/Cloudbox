@@ -43,8 +43,8 @@ jackett_docker_container: '{{ jackett_name }}'
 
 # Image
 jackett_docker_image_pull: yes
-jackett_docker_image_tag: 'cloudproxy'
-jackett_docker_image: 'sclemenceau/docker-jackett:{{ jackett_docker_image_tag }}'
+jackett_docker_image_tag: 'latest'
+jackett_docker_image: 'linuxserver/jackett:{{ jackett_docker_image_tag }}'
 
 # Ports
 jackett_docker_ports_defaults:
