@@ -13,7 +13,8 @@
   include_role:
     name: dns
   vars:
-    record: bazarr
+    dns_record: "bazarr"
+    dns_zone: "{{ user.domain }}"
 
 - name: Stop and remove any existing container
   docker_container:
@@ -40,9 +41,9 @@
       BACKUP: "no"
       PUID: "{{ uid }}"
       PGID: "{{ gid }}"
-      UMASK: 002
+      UMASK: "002"
       VIRTUAL_HOST: "bazarr.{{ user.domain }}"
-      VIRTUAL_PORT: 6767
+      VIRTUAL_PORT: "6767"
       LETSENCRYPT_HOST: "bazarr.{{ user.domain }}"
       LETSENCRYPT_EMAIL: "{{ user.email }}"
       TZ: "{{ tz }}"
